@@ -5,6 +5,7 @@ using AspNetWebapiCore.Models;
 using AspNetWebapiCore.Repositories;
 using AspNetWebapiCore.Dtos;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace FoodAPICore.Controller
 {
@@ -39,6 +40,41 @@ namespace FoodAPICore.Controller
                 FoodItem newFoodItem = _foodRepository.Add(Mapper.Map<FoodItem>(foodDto));
 
                 return CreatedAtRoute("GetSingleFood", new { id = newFoodItem.Id }, Mapper.Map<FoodDto>(newFoodItem));
+            }
+            catch (Exception exception)
+            {
+                return new StatusCodeResult(500);
+            }
+        }
+		
+		[HttpPatch("{id:int}")]
+        public IActionResult PartiallyUpdate(int id, [FromBody] JsonPatchDocument<FoodDto> patchDoc)
+        {
+            try
+            {
+                if (patchDoc == null)
+                {
+                    return BadRequest();
+                }
+
+                FoodItem existingEntity = _foodRepository.GetSingle(id);
+
+                if (existingEntity == null)
+                {
+                    return NotFound();
+                }
+
+                FoodDto foodItemDto = Mapper.Map<FoodDto>(existingEntity);
+                patchDoc.ApplyTo(foodItemDto, ModelState);
+
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                FoodItem updated = _foodRepository.Update(id, Mapper.Map<FoodItem>(foodItemDto));
+
+                return Ok(Mapper.Map<FoodDto>(updated));
             }
             catch (Exception exception)
             {
