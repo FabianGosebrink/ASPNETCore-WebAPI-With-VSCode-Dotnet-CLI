@@ -1,6 +1,6 @@
-using System;
+﻿using System;
 
-namespace AspNetWebapiCore.Models
+namespace DotnetcliWebApi.Entities
 {
     public class FoodItem
     {

@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 
-namespace AspNetWebapiCore.Dtos
+namespace DotnetcliWebApi.Dtos
 {
-    public class FoodDto
+    public class FoodItemDto
     {
         public int Id { get; set; }
         public string Name { get; set; }
