@@ -3,6 +3,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using DotnetcliWebApi.Entities;
+using DotnetcliWebApi.Models;
+using System.Linq.Dynamic.Core;
 
 namespace DotnetcliWebApi.Repositories
 {
@@ -18,7 +20,7 @@ namespace DotnetcliWebApi.Repositories
 
         public void Add(FoodItem item)
         {
-            item.Id = !GetAll().Any() ? 1 : GetAll().Max(x => x.Id) + 1;
+            item.Id = !_storage.Values.Any() ? 1 : _storage.Values.Max(x => x.Id) + 1;
 
             if (!_storage.TryAdd(item.Id, item))
             {
@@ -41,9 +43,21 @@ namespace DotnetcliWebApi.Repositories
             return item;
         }
 
-        public ICollection<FoodItem> GetAll()
+        public IQueryable<FoodItem> GetAll(QueryParameters queryParameters)
         {
-            return _storage.Values;
+            IQueryable<FoodItem> _allItems = _storage.Values.AsQueryable().OrderBy(queryParameters.OrderBy,
+               queryParameters.Descending);
+
+            if (queryParameters.HasQuery)
+            {
+                _allItems = _allItems
+                    .Where(x => x.Calories.ToString().Contains(queryParameters.Query.ToLowerInvariant())
+                    || x.Name.ToLowerInvariant().Contains(queryParameters.Query.ToLowerInvariant()));
+            }
+
+            return _allItems
+                .Skip(queryParameters.PageCount * (queryParameters.Page - 1))
+                .Take(queryParameters.PageCount);
         }
 
         public int Count()

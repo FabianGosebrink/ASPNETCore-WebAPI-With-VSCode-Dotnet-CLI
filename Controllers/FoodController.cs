@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using DotnetcliWebApi.Repositories;
 using System.Collections.Generic;
 using DotnetcliWebApi.Entities;
+using DotnetcliWebApi.Models;
 
 namespace DotnetcliWebApi.Controllers
 {
@@ -21,9 +22,9 @@ namespace DotnetcliWebApi.Controllers
         }
 
         [HttpGet]
-        public IActionResult Get()
+        public IActionResult Get([FromQuery] QueryParameters queryParameters)
         {
-            ICollection<FoodItem> foodItems = _foodRepository.GetAll();
+            ICollection<FoodItem> foodItems = _foodRepository.GetAll(queryParameters);
             IEnumerable<FoodItemDto> viewModels = foodItems
                 .Select(x => Mapper.Map<FoodItemDto>(x));
 
@@ -31,8 +32,8 @@ namespace DotnetcliWebApi.Controllers
         }
 
         [HttpGet]
-        [Route("{id:int}", Name = "GetSingleFood")]
-        public IActionResult Single(int id)
+        [Route("{id:int}", Name = nameof(GetSingleFood))]
+        public IActionResult GetSingleFood(int id)
         {
             FoodItem foodItem = _foodRepository.GetSingle(id);
 
